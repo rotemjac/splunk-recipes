@@ -1,0 +1,52 @@
+version: '3.2'
+volumes:
+      syslog-logs:
+      opt-splunk-etc:
+      opt-splunk-var:
+
+services:
+    client:
+      hostname: syslog-client
+      build: './client'
+      #image: balabit/syslog-ng
+      depends_on:
+        - syslog-server
+
+    syslog-server:
+      build: './collector'
+      volumes:
+        - syslog-logs:/var/log/syslog-ng
+      depends_on:
+        - splunk-forwarder
+
+    splunk-forwarder:
+      hostname: splunk-forwarder
+      image: splunk/universalforwarder:6.5.2-monitor
+   #  image: splunk/universalforwarder
+      environment:
+        SPLUNK_START_ARGS: --accept-license --answer-yes
+        SPLUNK_USER: root
+        SPLUNK_FORWARD_SERVER: splunk-receiver:9997
+
+      volumes:
+      #- opt-splunk-etc:/opt/splunk/etc
+      #- opt-splunk-var:/opt/splunk/var
+      - syslog-logs:/opt/splunk/var/log/syslog-logs
+      - ./forwarder/inputs.conf:/opt/splunk/etc/system/local/inputs.conf
+      ports:
+      - "9997:9997"
+      depends_on:
+      - splunk-receiver
+
+    splunk-receiver:
+      hostname: my-splunk-indexer
+      image : splunk/splunk:latest
+      ports:
+        - "8000:8000"
+      env_file:
+        - receiver/receiver.env
+      volumes:
+      - ./receiver/inputs.conf:/opt/splunk/etc/system/local/inputs.conf
+      - ./receiver/indexes.conf:/opt/splunk/etc/system/local/indexes.conf
+
+
