@@ -9,7 +9,9 @@ RUN apt-get update -qq && apt-get install -y syslog-ng
 
 ADD syslog-ng.conf /etc/syslog-ng/syslog-ng.conf
 
-RUN mkdir -p /var/log/syslog-ng
+RUN mkdir -p /var/log/syslog-ng/logs-syslog
+RUN mkdir -p /var/log/syslog-ng/logs-cron
+
 
 RUN find /usr/lib/ -name 'libjvm.so*' | xargs dirname | tee --append /etc/ld.so.conf.d/openjdk-libjvm.conf
 RUN ldconfig

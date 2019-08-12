@@ -1,41 +1,40 @@
 version: '3.2'
 volumes:
-      syslog-logs:
-      opt-splunk-etc:
-      opt-splunk-var:
+      logs-syslog:
+      logs-cron:
 
 services:
-    client:
-      hostname: syslog-client
+    log-client:
+      hostname: log-client
       build: './client'
       #image: balabit/syslog-ng
       depends_on:
-        - syslog-server
+        - log-collector
 
-    syslog-server:
+    log-collector:
       build: './collector'
       volumes:
-        - syslog-logs:/var/log/syslog-ng
-      depends_on:
-        - splunk-forwarder
+        - logs-syslog:/var/log/syslog-ng/logs-syslog
+        - logs-cron:/var/log/syslog-ng/logs-cron
 
     splunk-forwarder:
       hostname: splunk-forwarder
-      image: splunk/universalforwarder:6.5.2-monitor
-   #  image: splunk/universalforwarder
+   #   image: splunk/universalforwarder:6.5.2-monitor
+      image: splunk/splunk:latest
       environment:
         SPLUNK_START_ARGS: --accept-license --answer-yes
         SPLUNK_USER: root
-        SPLUNK_FORWARD_SERVER: splunk-receiver:9997
-
+        SPLUNK_PASSWORD: changeme
       volumes:
-      #- opt-splunk-etc:/opt/splunk/etc
-      #- opt-splunk-var:/opt/splunk/var
-      - syslog-logs:/opt/splunk/var/log/syslog-logs
+      - logs-syslog:/opt/splunk/var/log/logs-syslog
+      - logs-cron:/opt/splunk/var/log/logs-cron
       - ./forwarder/inputs.conf:/opt/splunk/etc/system/local/inputs.conf
+      - ./forwarder/outputs.conf:/opt/splunk/etc/system/local/outputs.conf
       ports:
+      - "8089:8089"
       - "9997:9997"
       depends_on:
+      - log-collector
       - splunk-receiver
 
     splunk-receiver:
