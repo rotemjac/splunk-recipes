@@ -12,12 +12,12 @@ RUN echo 'deb http://download.opensuse.org/repositories/home:/laszlo_budai:/sysl
 ## Cron ##
 RUN apt-get install -y cron
 
-ADD cron/crontab /etc/cron.d/cloudbuy-cron
+ADD cron/crontab /etc/cron.d/simple-cron
 
 ADD cron/cron_script.sh /script.sh
 RUN chmod +x /script.sh
 
-RUN chmod 0644 /etc/cron.d/cloudbuy-cron
+RUN chmod 0644 /etc/cron.d/simple-cron
 
 
 RUN touch /var/log/cron.log
