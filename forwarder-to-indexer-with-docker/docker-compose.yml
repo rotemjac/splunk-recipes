@@ -1,13 +1,11 @@
 version: '3.2'
 volumes:
       logs-syslog:
-      logs-cron:
 
 services:
     log-client:
       hostname: log-client
       build: './client'
-      #image: balabit/syslog-ng
       depends_on:
         - log-collector
 
@@ -15,7 +13,6 @@ services:
       build: './collector'
       volumes:
         - logs-syslog:/var/log/syslog-ng/logs-syslog
-        - logs-cron:/var/log/syslog-ng/logs-cron
 
     splunk-forwarder:
       hostname: splunk-forwarder
@@ -27,7 +24,6 @@ services:
         SPLUNK_PASSWORD: changeme
       volumes:
       - logs-syslog:/opt/splunk/var/log/logs-syslog
-      - logs-cron:/opt/splunk/var/log/logs-cron
       - ./forwarder/inputs.conf:/opt/splunk/etc/system/local/inputs.conf
       - ./forwarder/outputs.conf:/opt/splunk/etc/system/local/outputs.conf
       ports:
