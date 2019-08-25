@@ -20,7 +20,7 @@ services:
       image: splunk/splunk:latest
       environment:
         SPLUNK_START_ARGS: --accept-license --answer-yes
-        SPLUNK_USER: root
+        SPLUNK_USER: splunk
         SPLUNK_PASSWORD: changeme
       volumes:
       - logs-syslog:/opt/splunk/var/log/logs-syslog
